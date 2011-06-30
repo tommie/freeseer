@@ -219,6 +219,13 @@ class DB_Connector():
         return rooms_matched
         
 
+    def get_ids(self):
+         self.cursor = self.db_connection.cursor()
+         self.cursor.execute('''SELECT ID FROM PRESENTATIONS''')
+         for row in self.cursor:
+             print row[0]
+         
+         
     def get_presentation(self, talk_id):
         
         self.cursor = self.db_connection.cursor()

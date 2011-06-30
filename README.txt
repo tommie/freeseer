@@ -44,7 +44,7 @@ For Fedora Linux, install:
 For Ubuntu Linux, install:
 --------------------------
     “sudo apt-get install build-essential qt4-qmake pyqt4-dev-tools 
-    libqt4-dev python-qt4 python-qt4-dev python2.6-dev python-feedparser”
+    libqt4-dev python-qt4 python-qt4-dev python2.6-dev python-feedparser python-argparse”
 
 For Windows, install: 
 ---------------------

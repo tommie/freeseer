@@ -24,6 +24,8 @@
 
 import cmd
 
+from freeseer.frontend.cli.freeseer_record_parser import FreeSeerRecordParser
+
 class FreeSeerShell(cmd.Cmd):
     '''
     Freeseer Shell. Used to provide an interface to the CLI frontend
@@ -35,28 +37,28 @@ class FreeSeerShell(cmd.Cmd):
         "Copyright (C) 2011  Free and Open Source Software Learning Centre\n"
         
         
-    #TODO    
-    def do_frecord(self, line):
-        print "frecord command executed with arguments: '" + line + "'" 
+    def do_record(self, line):
+        parser = FreeSeerRecordParser()
+        parser.analyse_command(line)
 
     #TODO   
-    def complete_frecord(self, text, line, start_index, end_index):        
+    def complete_record(self, text, line, start_index, end_index):        
         pass
   
     #TODO         
-    def do_ftalk(self, line):
-        print "ftalk command executed with arguments: '" + line + "'" 
+    def do_talk(self, line):
+        print "talk command executed with arguments: '" + line + "'" 
 
     #TODO   
-    def complete_ftalk(self, text, line, start_index, end_index):        
+    def complete_talk(self, text, line, start_index, end_index):        
         pass
     
     #TODO          
-    def do_fconfig(self, line):
-        print "fconfig command executed with arguments: '" + line + "'" 
+    def do_config(self, line):
+        print "config command executed with arguments: '" + line + "'" 
 
     #TODO   
-    def complete_fconfig(self, text, line, start_index, end_index):        
+    def complete_config(self, text, line, start_index, end_index):        
         pass
         
     def run(self):
