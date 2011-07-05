@@ -46,11 +46,11 @@ class FreeSeerRecordParser(argparse.ArgumentParser):
         '''
         Analyses the command typed by the user
         '''             
-        try:
-            namespace = self.parse_args(command.split())
-            self.perform_task(namespace)
-        except:
-            print "*** Unknown syntax: " + command
+        #try:
+        namespace = self.parse_args(command.split())
+        self.perform_task(namespace)
+        #except:
+            #print "*** Unknown syntax: " + command
 
             
     def perform_task(self, namespace):
@@ -70,9 +70,8 @@ class FreeSeerRecordParser(argparse.ArgumentParser):
     def default_record(self):    
         '''
         Records to the default video folder a default filename
-        '''   
-                 
-        self.core.record_default()
+        '''                    
+        self.core.record()
         print "\n Recording on progress, press <space> to stop \n"   
         
         while(self.getchar() != " "):            
@@ -83,12 +82,10 @@ class FreeSeerRecordParser(argparse.ArgumentParser):
     def record_by_id(self,id):
         '''
         Records the presentation with the specified id
-        '''
-        
-        presentation = self.db_connector.get_presentation(id)           
-
-        if(presentation):
-            self.core.record(presentation)   
+        '''        
+        prs = self.db_connector.get_presentation(id)  
+        if(prs):
+            self.core.record(presentation=prs)   
             print "\n Recording on progress, press <space> to stop \n"          
       
             while(self.getchar() != " "):            
@@ -102,10 +99,9 @@ class FreeSeerRecordParser(argparse.ArgumentParser):
     def record_by_path(self,path):
         '''
         Records to the specific path
-        '''
-        
+        '''        
         if self._is_valid_filename(path):
-            self.core.record_to_path(path)
+            self.core.record(record_location=path)
             print "\n Recording on progress, press <space> to stop \n"   
 
             while(self.getchar() != " "):            

@@ -219,7 +219,6 @@ class DB_Connector():
         return rooms_matched
         
     def get_presentation(self, talk_id):
-        
         self.cursor = self.db_connection.cursor()
         self.cursor.execute('''SELECT Speaker, 
                             Title,
@@ -233,6 +232,7 @@ class DB_Connector():
                             FROM presentations WHERE Id=?''',
                             [unicode(talk_id)])
         for row in self.cursor:
+            print row[0]
             speaker 	 = row[0]
             title 	 = row[1]
             description  = row[2]

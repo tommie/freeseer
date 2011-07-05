@@ -410,35 +410,22 @@ class FreeseerCore:
                  "comment" : presentation.description}
 
 
-    def record(self, presentation):
+    def record(self, presentation = None, record_location = None):
         '''
         Informs backend to begin recording presentation.
         '''
-        #create a filename to record to
-        record_name = self.get_record_name(presentation)
-
-        #prepare metadata
-        data = self.prepare_metadata(presentation)
-        self.backend.populate_metadata(data)
-
-        record_location = os.path.abspath(self.config.videodir + '/' + record_name)
-
-        self.backend.record(record_location)
-        self.logger.log.info('Recording started')
         
-    def record_to_path(self, path):
-        '''
-        Informs backend to begin recording to a defined path.
-        '''
-        self.backend.record(path)
-        self.logger.log.info('Recording started')
+        record_name = "default.ogg"
         
-    def record_default(self):
-        '''
-        Informs backend to begin recording presentation.
-        '''
+        #create a filename based on presentation name to record to
+        if(presentation):            
+            record_name = self.get_record_name(presentation)
+            #prepare metadata    
+            data = self.prepare_metadata(presentation)
+            self.backend.populate_metadata(data)        
 
-        record_location = os.path.abspath(self.config.videodir + '/' + "default.ogg")
+        if record_location is None:
+            record_location = os.path.abspath(self.config.videodir + '/' + record_name)
 
         self.backend.record(record_location)
         self.logger.log.info('Recording started')
