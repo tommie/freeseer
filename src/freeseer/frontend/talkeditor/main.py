@@ -199,6 +199,7 @@ class TalkEditorMainApp(QtGui.QMainWindow):
 
     
     def add_talk(self):
+        print self.ui.dateTimeEdit.text()
         presentation = Presentation(str(self.ui.titleEdit.text()),
                                     str(self.ui.presenterEdit.text()),
                                     "", # description

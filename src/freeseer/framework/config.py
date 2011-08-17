@@ -85,7 +85,7 @@ class Config:
         try:
             os.makedirs(self.videodir)
         except OSError:
-            print('Video directory exists.')
+            pass
             
     def readConfig(self):
         '''

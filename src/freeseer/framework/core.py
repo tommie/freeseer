@@ -286,7 +286,7 @@ class FreeseerCore:
         Returns supported video sources.
         '''
         vidsrcs = self.backend.get_video_sources()
-        self.logger.log.debug('Available video sources: ' + str(vidsrcs))
+        #self.logger.log.debug('Available video sources: ' + str(vidsrcs))
         return vidsrcs
 
         
@@ -304,7 +304,7 @@ class FreeseerCore:
         Returns supported audio sources.
         '''
         sndsrcs = self.backend.get_audio_sources()
-        self.logger.log.debug('Available audio sources: ' + str(sndsrcs))
+        #self.logger.log.debug('Available audio sources: ' + str(sndsrcs))
         return sndsrcs
 
 
@@ -320,7 +320,6 @@ class FreeseerCore:
             
         self.backend.set_video_mode(mode)
 
-        
     def change_videosrc(self, vid_source, vid_device):
         '''
         Informs backend of new video source to use when recording.

@@ -23,8 +23,13 @@
 # http://wiki.github.com/fosslc/freeseer/
 
 import cmd
+import sys
+import subprocess
+import os
 
 from freeseer.frontend.cli.freeseer_record_parser import FreeSeerRecordParser
+from freeseer.frontend.cli.freeseer_talk_parser import FreeSeerTalkParser
+from freeseer.frontend.cli.freeseer_config_parser import FreeSeerConfigParser
 
 class FreeSeerShell(cmd.Cmd):
     '''
@@ -37,6 +42,12 @@ class FreeSeerShell(cmd.Cmd):
         "Copyright (C) 2011  Free and Open Source Software Learning Centre\n"
         
         
+    def do_exit(self, line):
+        sys.exit()
+        
+    def do_quit(self, line):
+        sys.exit()
+        
     def do_record(self, line):
         parser = FreeSeerRecordParser()
         parser.analyse_command(line)
@@ -47,7 +58,8 @@ class FreeSeerShell(cmd.Cmd):
   
     #TODO         
     def do_talk(self, line):
-        print "talk command executed with arguments: '" + line + "'" 
+        parser = FreeSeerTalkParser()
+        parser.analyse_command(line)
 
     #TODO   
     def complete_talk(self, text, line, start_index, end_index):        
@@ -55,7 +67,18 @@ class FreeSeerShell(cmd.Cmd):
     
     #TODO          
     def do_config(self, line):
-        print "config command executed with arguments: '" + line + "'" 
+        parser = FreeSeerConfigParser()
+        parser.analyse_command(line)
+        
+    def do_help(self, line):
+        if(line == "record"):
+            subprocess.call(["vim","-R",os.getcwd() + "/freeseer/frontend/cli/help/record_help.txt"])
+        elif(line == "talk"):
+            subprocess.call(["vim","-R",os.getcwd() + "/freeseer/frontend/cli/help/talk_help.txt"])
+        elif(line == "config"):
+            subprocess.call(["vim","-R",os.getcwd() + "/freeseer/frontend/cli/help/config_help.txt"])
+        else:
+            print "The '" + line + "' topic is not known" 
 
     #TODO   
     def complete_config(self, text, line, start_index, end_index):        

@@ -45,13 +45,9 @@ class FreeSeerRecordParser(argparse.ArgumentParser):
     def analyse_command(self, command):  
         '''
         Analyses the command typed by the user
-        '''             
-        #try:
+        ''' 
         namespace = self.parse_args(command.split())
         self.perform_task(namespace)
-        #except:
-            #print "*** Unknown syntax: " + command
-
             
     def perform_task(self, namespace):
         '''
@@ -94,7 +90,7 @@ class FreeSeerRecordParser(argparse.ArgumentParser):
             self.core.stop();
         
         else:
-            print "\nError: There's no presentation with such id\n"
+            print "\n*** Error: There's no presentation with such id\n"
         
     def record_by_path(self,path):
         '''
@@ -111,11 +107,11 @@ class FreeSeerRecordParser(argparse.ArgumentParser):
           
     def _is_valid_filename(self, path):
         if not path.endswith(".ogg"):
-            print "\nError: The file must be an ogg file\n"
+            print "\n*** Error: The file must be an ogg file\n"
             return False
         
         elif not self._is_valid_path(path):
-            print "\nErro: This path doesn't exist\n"
+            print "\n*** Error: This path doesn't exist\n"
             return False
         
         else:
@@ -161,10 +157,6 @@ class FreeSeerRecordParser(argparse.ArgumentParser):
             if src in vidsrcs:
                 if (src == 'desktop'):
                     self.videosrc = 'desktop'
-
-                    if (self.core.config.videodev == 'local area'):
-                        self.desktopAreaEvent(int(self.core.config.start_x), int(self.core.config.start_y), int(self.core.config.end_x), int(self.core.config.end_y))
-
                     self.core.change_videosrc(self.videosrc, self.core.config.videodev)
 
                 elif (src == 'usb'):
@@ -184,6 +176,4 @@ class FreeSeerRecordParser(argparse.ArgumentParser):
 
                     else:
                         self.core.logger.log.debug('Can NOT find video device: '+ dev)
-
-
-                self.core.set_audio_mode(False)
+            self.core.set_audio_mode(False)
