@@ -1,0 +1,24 @@
+Source: freeseer
+Section: video
+Priority: optional
+Maintainer: Tommie Gannert <tommie@spotify.com>
+Build-depends:
+ debhelper (>= 7.0.50),
+ python-all (>= 2.6),
+ build-essential,
+ pyqt4-dev-tools,
+ cmake,
+ libqt4-dev,
+ python-feedparser
+Standards-version: 3.9.1
+XS-Python-Version: >= 2.6
+
+Package: freeseer
+Architecture: all
+Depends: ${python:Depends}, python-feedparser, python-qt4
+XB-Python-version: ${python:Versions}
+Homepage: https://github.com/fosslc/freeseer/wiki
+Description: Recording and streaming tool
+ Freeseer is a video recording and streaming tool. It captures
+ audio and video from a variety of sources and makes them available
+ as recordings and/or a live video stream.

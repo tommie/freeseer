@@ -1,0 +1,10 @@
+#! /usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	dh_auto_install
+	sed -i 's;^LANGUAGE_DIR = .*;LANGUAGE_DIR = "/usr/share/freeseer/translations/configtool/";' debian/freeseer/usr/lib/python*/*/freeseer/frontend/configtool/freeseer_configtool.py
+	sed -i 's;^LANGUAGE_DIR = .*;LANGUAGE_DIR = "/usr/share/freeseer/translations/default/";' debian/freeseer/usr/lib/python*/*/freeseer/frontend/default/main.py
+	sed -i 's;^LANGUAGE_DIR = .*;LANGUAGE_DIR = "/usr/share/freeseer/translations/talkeditor/";' debian/freeseer/usr/lib/python*/*/freeseer/frontend/talkeditor/main.py

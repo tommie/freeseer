@@ -37,7 +37,7 @@ __version__ = project_info.VERSION
 
 NAME = project_info.NAME
 URL = project_info.VERSION
-LANGUAGE_DIR = 'freeseer/frontend/talkeditor/languages/'
+LANGUAGE_DIR = os.path.join(os.path.dirname(__file__), 'languages/')
 
 
 class AboutDialog(QtGui.QDialog):

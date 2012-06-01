@@ -8,7 +8,7 @@
 .pydevproject
 .directory
 .settings
-dist
-build
+/dist
+/build
 MANIFEST
 freeseer.egg-info

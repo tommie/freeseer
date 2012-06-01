@@ -44,8 +44,8 @@ RECORD_BUTTON_ARTIST=u'Sekkyumu'
 RECORD_BUTTON_LINK=u'http://sekkyumu.deviantart.com/'
 HEADPHONES_ARTIST=u'Ben Fleming'
 HEADPHONES_LINK=u'http://mediadesign.deviantart.com/'
-LANGUAGE_DIR = 'freeseer/frontend/default/languages/'
-    
+LANGUAGE_DIR = os.path.join(os.path.dirname(__file__), 'languages/')
+
 
 class AboutDialog(QtGui.QDialog):
     '''

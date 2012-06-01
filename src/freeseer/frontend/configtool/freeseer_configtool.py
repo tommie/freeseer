@@ -23,6 +23,7 @@
 # http://wiki.github.com/fosslc/freeseer/
 
 from os import listdir;
+import os.path
 from sys import *
 
 from PyQt4 import QtGui, QtCore
@@ -34,7 +35,7 @@ from freeseer_configtool_ui import *
 
 __version__ = project_info.VERSION
 
-LANGUAGE_DIR = 'freeseer/frontend/configtool/languages/'
+LANGUAGE_DIR = os.path.join(os.path.dirname(__file__), 'languages/')
 
 class ConfigTool(QtGui.QDialog):
     '''
