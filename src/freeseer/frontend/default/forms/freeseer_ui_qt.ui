@@ -29,30 +29,9 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QPushButton" name="recordButton">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>40</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Record</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../../../framework/resources/resource.qrc">
-           <normaloff>:/recordButton/record_red_button.png</normaloff>
-           <normalon>:/recordButton/stop_red_button.png</normalon>:/recordButton/record_red_button.png</iconset>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="eventAndRoomLayout">
+        <layout class="QHBoxLayout" name="authorLayout">
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="authorLabel">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -72,43 +51,15 @@
             </size>
            </property>
            <property name="text">
-            <string>Event</string>
+            <string>Author</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="eventList">
+          <widget class="QLineEdit" name="author">
            <item>
-            <property name="text">
-             <string>All</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_6">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>24</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Room</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="roomList">
-           <item>
-            <property name="text">
-             <string>All</string>
+            <property name="tooltip">
+             <string>Your name</string>
             </property>
            </item>
           </widget>
@@ -116,9 +67,9 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="talkListLayout">
+        <layout class="QHBoxLayout" name="titleLayout">
          <item>
-          <widget class="QLabel" name="talkLabel">
+          <widget class="QLabel" name="titleLabel">
            <property name="maximumSize">
             <size>
              <width>40</width>
@@ -131,13 +82,34 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="talkList">
+          <widget class="QLineEdit" name="title">
            <property name="toolTip">
-            <string>Title of the presentation being recorded.  For example &quot;Thanh Ha - Introduction to Freeseer&quot;</string>
+            <string>Title of the presentation being recorded.</string>
            </property>
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="recordButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Record</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../../../framework/resources/resource.qrc">
+           <normaloff>:/recordButton/record_red_button.png</normaloff>
+           <normalon>:/recordButton/stop_red_button.png</normalon>:/recordButton/record_red_button.png</iconset>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QGridLayout" name="gridLayout">
@@ -245,7 +217,6 @@
      <string>Edit</string>
     </property>
     <addaction name="actionPreferences"/>
-    <addaction name="actionEdit_talks"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -273,11 +244,6 @@
     <string/>
    </property>
   </action>
-  <action name="actionEdit_talks">
-   <property name="text">
-    <string>Edit Talks</string>
-   </property>
-  </action>
   <action name="actionPreferences">
    <property name="text">
     <string>Preferences</string>
@@ -285,8 +251,9 @@
   </action>
  </widget>
  <tabstops>
+  <tabstop>author</tabstop>
+  <tabstop>title</tabstop>
   <tabstop>recordButton</tabstop>
-  <tabstop>talkList</tabstop>
   <tabstop>audioFeedbackCheckbox</tabstop>
   <tabstop>audioFeedbackSlider</tabstop>
  </tabstops>
@@ -329,7 +296,7 @@
   <connection>
    <sender>recordButton</sender>
    <signal>toggled(bool)</signal>
-   <receiver>eventList</receiver>
+   <receiver>author</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -345,23 +312,7 @@
   <connection>
    <sender>recordButton</sender>
    <signal>toggled(bool)</signal>
-   <receiver>roomList</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>440</x>
-     <y>72</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>436</x>
-     <y>99</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>recordButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>talkList</receiver>
+   <receiver>title</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

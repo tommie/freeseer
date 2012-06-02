@@ -67,13 +67,13 @@ class AboutDialog(QtGui.QDialog):
         u'<p>' + COPYRIGHT + u'</p>' + \
         u'<p><a href="' + URL + u'">' + URL + u'</a></p>' \
         u'<p>' + LICENSE_TEXT + u'</p>'
- 
+
         self.ui.retranslateUi(self);
         self.ui.aboutInfo.setText(ABOUT_INFO);
 
 class SystemLanguages:
     '''
-    Language system class that is responsible for retrieving valid languages in the system 
+    Language system class that is responsible for retrieving valid languages in the system
     '''
 
     def __init__(self):
@@ -93,7 +93,7 @@ class SystemLanguages:
         except:
             return [];
         return language_prefix;
-        
+
 class TalkEditorMainApp(QtGui.QMainWindow):
     '''
     Freeseer talk database editor main gui class
@@ -102,10 +102,10 @@ class TalkEditorMainApp(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)
         self.ui = Ui_TalkEditorMainWindow()
         self.ui.setupUi(self)
-        self.aboutDialog = AboutDialog()    
+        self.aboutDialog = AboutDialog()
         self.ui.editTable.setColumnHidden(5, True)
         self.default_language = 'en';
-        
+
         # Initialize geometry, to be used for restoring window positioning.
         self.geometry = None
 
@@ -114,7 +114,7 @@ class TalkEditorMainApp(QtGui.QMainWindow):
             self.core = core
         else:
             self.core = FreeseerCore(self)
-        
+
         #Setup the translator and populate the language menu under options
         self.uiTranslator = QtCore.QTranslator();
         self.langActionGroup = QtGui.QActionGroup(self);
@@ -122,58 +122,58 @@ class TalkEditorMainApp(QtGui.QMainWindow):
         self.setupLanguageMenu();
 
         self.load_talks()
-        
+
         # edit talks connections
         self.connect(self.ui.confirmAddTalkButton, QtCore.SIGNAL('clicked()'), self.add_talk)
         self.connect(self.ui.rssButton, QtCore.SIGNAL('clicked()'), self.add_talks_from_rss)
         self.connect(self.ui.removeTalkButton, QtCore.SIGNAL('clicked()'), self.remove_talk)
         self.connect(self.ui.resetButton, QtCore.SIGNAL('clicked()'), self.reset)
         self.ui.addTalkGroupBox.setHidden(True)
-        
+
         # Main Window Connections
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'), self.close)
         self.connect(self.ui.actionAbout, QtCore.SIGNAL('triggered()'), self.aboutDialog.show)
-        
+
         # editTable Connections
         self.connect(self.ui.editTable, QtCore.SIGNAL('cellChanged(int, int)'), self.edit_talk)
 
     # TODO fix this
     def setupLanguageMenu(self):
 
-        #Add Languages to the Menu Ensure only one is clicked 
+        #Add Languages to the Menu Ensure only one is clicked
         self.langActionGroup.setExclusive(True)
-        system_ending = QtCore.QLocale.system().name();    #Retrieve Current Locale from the operating system         
+        system_ending = QtCore.QLocale.system().name();    #Retrieve Current Locale from the operating system
         active_button = None; #the current active menu item (menu item for default language)
         current_lang_length = 0; #Used to determine the length of prefix that match for the current default language
         default_ending = self.default_language;
         '''
         Current Lang Length
         0 -  No Common Prefix
-        1 -  Common Language 
+        1 -  Common Language
         2 -  Common Language and Country
         '''
-        language_table = SystemLanguages(); #Load all languages from the language folder 
-             
-    
+        language_table = SystemLanguages(); #Load all languages from the language folder
+
+
         for language_name in language_table.languages:
             translator = QtCore.QTranslator(); #Create a translator to translate names
-            data = translator.load(LANGUAGE_DIR+'tr_'+language_name);  
+            data = translator.load(LANGUAGE_DIR+'tr_'+language_name);
             #Create the button
-            if(data == False):    
+            if(data == False):
                 continue;
             language_display_text = translator.translate("MainApp","language_name");
-            
+
             if(language_display_text!=''):
                 language_menu_button = QtGui.QAction(self);
                 language_menu_button.setCheckable(True);
-                
+
             #Dialect handling for locales from operating system. Use possible match
             if(language_name == system_ending): #direct match
                 active_button = language_menu_button;
                 current_lang_length = 2;
                 self.default_language = system_ending;
             else:
-                
+
                 if(language_name.split("_")[0] == system_ending.split("_")[0]): #If language matches but not country
                     if(current_lang_length < 1): #if there has been no direct match yet.
                         active_button = language_menu_button;
@@ -183,21 +183,21 @@ class TalkEditorMainApp(QtGui.QMainWindow):
                     if(current_lang_length == 0):
                         active_button = language_menu_button;
                         self.default_language = language_name;
-                        
+
             #language_name is a holder for the language name in the translation file tr_*.ts
             language_menu_button.setText(language_display_text);
             language_menu_button.setData(language_name);
             self.ui.menuLanguage.addAction(language_menu_button);
             self.langActionGroup.addAction(language_menu_button);
-            
+
         if(active_button!=None):
             active_button.setChecked(True);
             #print('There are no languages available in the system except english. Please check the language directory to ensure qm files exist');
-        
+
         #Set up the event handling for each of the menu items
         self.connect(self.langActionGroup,QtCore.SIGNAL('triggered(QAction *)'), self.translateAction)
 
-    
+
     def add_talk(self):
         presentation = Presentation(str(self.ui.titleEdit.text()),
                                     str(self.ui.presenterEdit.text()),
@@ -206,10 +206,10 @@ class TalkEditorMainApp(QtGui.QMainWindow):
                                     str(self.ui.eventEdit.text()),
                                     str(self.ui.dateTimeEdit.text()),
                                     str(self.ui.roomEdit.text()))
-                
+
         # Do not add talks if they are empty strings
         if (len(presentation.title) == 0): return
-        
+
         self.core.add_talk(presentation)
 
         # cleanup
@@ -225,13 +225,13 @@ class TalkEditorMainApp(QtGui.QMainWindow):
 
         self.update_talk_views()
 
-    def remove_talk(self): 
+    def remove_talk(self):
         try:
             row_clicked = self.ui.editTable.currentRow()
-        except:            
+        except:
             return
-        
-        id = self.ui.editTable.item(row_clicked, 5).text() 
+
+        id = self.ui.editTable.item(row_clicked, 5).text()
         self.core.delete_talk(str(id))
         self.ui.editTable.removeRow(row_clicked)
         self.update_talk_views()
@@ -257,19 +257,19 @@ class TalkEditorMainApp(QtGui.QMainWindow):
 
     def load_talks(self):
         talklist = self.core.get_talk_titles()
-        
+
         self.ui.editTable.clearContents()
-        self.ui.editTable.setRowCount(0)    
-       
-        for talk in talklist:          
+        self.ui.editTable.setRowCount(0)
+
+        for talk in talklist:
             index = self.ui.editTable.rowCount()
             self.ui.editTable.insertRow(index)
-            
-            for i in range(len(talk)):                
-                self.ui.editTable.setItem(index, i, QtGui.QTableWidgetItem(unicode(talk[i])))                         
-        
+
+            for i in range(len(talk)):
+                self.ui.editTable.setItem(index, i, QtGui.QTableWidgetItem(unicode(talk[i])))
+
         self.ui.editTable.resizeRowsToContents()
-            
+
     def add_talks_from_rss(self):
         rss_url = str(self.ui.rssEdit.text())
         self.core.add_talks_from_rss(rss_url)
@@ -287,25 +287,25 @@ class TalkEditorMainApp(QtGui.QMainWindow):
 
         # send the changed signal to Freeseer
         self.emit(QtCore.SIGNAL('changed'))
-        
+
     def closeEvent(self, event):
         self.core.logger.log.info('Exiting talk database editor...')
         self.geometry = self.saveGeometry()
         event.accept()
-    
+
     def translateAction(self , action):
         '''
     	When a language is selected from the language menu this function is called
     	The language to be changed to is retrieved
     	'''
 
-        language_prefix = action.data().toString();  
+        language_prefix = action.data().toString();
         self.translateFile(language_prefix);
-      
+
     def translateFile(self, file_ending):
         '''
     	Actually perfoms the translation. This is called by the handler for the language menu
-    	Note: If the language file can not be loaded then the default language is english 
+    	Note: If the language file can not be loaded then the default language is english
     	'''
         load_string = LANGUAGE_DIR + 'tr_' + file_ending; #create language file path
         loaded = self.uiTranslator.load(load_string);
@@ -314,7 +314,7 @@ class TalkEditorMainApp(QtGui.QMainWindow):
             self.ui.retranslateUi(self); #Translate both the ui and the about page
         else:
             print("Invalid Locale Resorting to Default Language: English");
-    
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

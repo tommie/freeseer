@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # freeseer - vga/presentation capture software
@@ -23,25 +22,12 @@
 # http://wiki.github.com/fosslc/freeseer/
 
 
-
-class Presentation():	
+class Presentation(object):
     '''
     This class is responsible for encapsulate data about presentations
     and its database related operations
     '''
-
-    def __init__(self, title, speaker=None, description="", level="", event="", time="", room=None, talk_id=None, filename_id=None):
-        
-        '''
-        Initialize a presentation instance
-        '''
-        self.speaker = speaker
+    def __init__(self, title, author, start_time):
         self.title = title
-        self.description = description
-        self.level = level
-        self.event = event
-        self.time = time
-        self.room = room
-        self.talk_id = talk_id
-        self.filename_id = filename_id
-
+        self.author = author
+        self.start_time = start_time

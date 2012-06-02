@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # freeseer - vga/presentation capture software
@@ -65,7 +64,7 @@ class AboutDialog(QtGui.QDialog):
         DESCRIPTION = self.tr('AboutDialog','Freeseer is a video capture utility capable of capturing presentations. It captures video sources such as usb, firewire, or local desktop along with audio and mixes them together to produce a video.')
         COPYRIGHT=self.tr('Copyright (C) 2011 The Free and Open Source Software Learning Centre')
         LICENSE_TEXT=self.tr("Freeseer is licensed under the GPL version 3. This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.")
-    
+
         ABOUT_INFO = u'<h1>'+NAME+u'</h1>' + \
 	    u'<br><b>'+ self.tr("Version")+":" + __version__ + u'</b>' + \
 	    u'<p>' + DESCRIPTION + u'</p>' + \
@@ -74,28 +73,28 @@ class AboutDialog(QtGui.QDialog):
 	    u'<p>' + LICENSE_TEXT + u'</p>' \
 	    u'<p>' +  self.tr("Record button graphics by")+ ': <a href="' + RECORD_BUTTON_LINK+ u'">' + RECORD_BUTTON_ARTIST + u'</a></p>' \
 	    u'<p>'+ self.tr("Headphones graphics by") + ': <a href="' + HEADPHONES_LINK+ u'">' + HEADPHONES_ARTIST + u'</a></p>'
- 
+
         self.ui.retranslateUi(self);
         self.ui.aboutInfo.setText(ABOUT_INFO);
 
 class SystemLanguages:
     '''
-    Language system class that is responsible for retrieving valid languages in the system 
+    Language system class that is responsible for retrieving valid languages in the system
     '''
     def __init__(self):
         self.languages = []
         self.languages = self.getAllLanguages();
-    
+
     def getAllLanguages(self):
-        '''    
-        Returns all the valid languages that have existing qm files. In other words languages 
+        '''
+        Returns all the valid languages that have existing qm files. In other words languages
         that can be loaded into the translator
-        ''' 
+        '''
         try:
             files = listdir(LANGUAGE_DIR);
             files = map(lambda x: x.split('.') , files);
             qm_files = filter(lambda x:x[len(x)-1] == 'qm',files);
-            language_prefix = map(lambda x: x[0].split("tr_")[1],qm_files); 
+            language_prefix = map(lambda x: x[0].split("tr_")[1],qm_files);
         except:
             return [];
         return language_prefix;
@@ -114,21 +113,17 @@ class MainApp(QtGui.QMainWindow):
         self.default_language = 'en';
         self.talks_to_save = []
         self.talks_to_delete = []
-        
+
         # Initialize geometry, to be used for restoring window positioning.
         self.geometry = None
 
         self.core = FreeseerCore(self)
-        
+
         #Setup the translator and populate the language menu under options
         self.uiTranslator = QtCore.QTranslator();
         self.langActionGroup = QtGui.QActionGroup(self);
         QtCore.QTextCodec.setCodecForTr(QtCore.QTextCodec.codecForName('utf-8'));
         self.setupLanguageMenu();
-    
-        self.load_talks()
-        self.load_events()
-        self.load_rooms()
 
         # setup systray
         logo = QtGui.QPixmap(":/freeseer/freeseer_logo.png")
@@ -146,8 +141,6 @@ class MainApp(QtGui.QMainWindow):
         self.connect(self.systray, QtCore.SIGNAL('activated(QSystemTrayIcon::ActivationReason)'), self._icon_activated)
 
         # main tab connections
-        self.connect(self.ui.eventList, QtCore.SIGNAL('currentIndexChanged(const QString&)'), self.get_rooms_and_talks_at_event)
-        self.connect(self.ui.roomList, QtCore.SIGNAL('currentIndexChanged(const QString&)'), self.get_talks_at_room)
         self.connect(self.ui.recordButton, QtCore.SIGNAL('toggled(bool)'), self.capture)
         self.connect(self.ui.testButton, QtCore.SIGNAL('toggled(bool)'), self.test_sources)
         self.connect(self.ui.audioFeedbackCheckbox, QtCore.SIGNAL('stateChanged(int)'), self.toggle_audio_feedback)
@@ -155,9 +148,9 @@ class MainApp(QtGui.QMainWindow):
         # Main Window Connections
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'), self.close)
         self.connect(self.ui.actionAbout, QtCore.SIGNAL('triggered()'), self.aboutDialog.show)
-        self.connect(self.ui.actionEdit_talks, QtCore.SIGNAL('triggered()'), self.run_talk_editor)
+        #self.connect(self.ui.actionEdit_talks, QtCore.SIGNAL('triggered()'), self.run_talk_editor)
         self.connect(self.ui.actionPreferences, QtCore.SIGNAL('triggered()'),self.run_config_tool)
-                
+
         self.load_settings()
         self.core.preview(True, self.ui.previewWidget.winId())
 
@@ -167,32 +160,32 @@ class MainApp(QtGui.QMainWindow):
 
         # setup spacebar key
         self.ui.recordButton.setShortcut(QtCore.Qt.Key_Space)
-        self.ui.recordButton.setFocus()
+        self.ui.author.setFocus()
 
-        self.talkEditor = TalkEditorMainApp(self.core)
+        #self.talkEditor = TalkEditorMainApp(self.core)
         self.configTool = ConfigTool(self.core)
         self.configTool.hide()
 
     def setupLanguageMenu(self):
-        #Add Languages to the Menu Ensure only one is clicked 
+        #Add Languages to the Menu Ensure only one is clicked
         self.langActionGroup.setExclusive(True)
-        system_ending = QtCore.QLocale.system().name();    #Retrieve Current Locale from the operating system         
+        system_ending = QtCore.QLocale.system().name();    #Retrieve Current Locale from the operating system
         active_button = None; #the current active menu item (menu item for default language)
         current_lang_length = 0; #Used to determine the length of prefix that match for the current default language
         default_ending = self.default_language;
         '''
         Current Lang Length
         0 -  No Common Prefix
-        1 -  Common Language 
+        1 -  Common Language
         2 -  Common Language and Country
         '''
-        language_table = SystemLanguages(); #Load all languages from the language folder 
-    
+        language_table = SystemLanguages(); #Load all languages from the language folder
+
         for language_name in language_table.languages:
             translator = QtCore.QTranslator(); #Create a translator to translate names
-            data = translator.load(LANGUAGE_DIR+'tr_'+language_name);  
+            data = translator.load(LANGUAGE_DIR+'tr_'+language_name);
             #Create the button
-            if(data == False):    
+            if(data == False):
                 continue;
             language_display_text = translator.translate("MainApp","language_name");
             if(language_display_text!=''):
@@ -221,11 +214,11 @@ class MainApp(QtGui.QMainWindow):
         if(active_button!=None):
             active_button.setChecked(True);
             #print('There are no languages available in the system except english. Please check the language directory to ensure qm files exist');
-        
+
         #Set up the event handling for each of the menu items
         self.connect(self.langActionGroup,QtCore.SIGNAL('triggered(QAction *)'), self.translateAction)
-        
-    def load_settings(self): 
+
+    def load_settings(self):
         self.core.logger.log.info('loading setting...')
 
         #load the config file
@@ -236,7 +229,7 @@ class MainApp(QtGui.QMainWindow):
             self.core.set_video_mode(False)
         else:
             self.core.set_video_mode(True)
-                        
+
             # load video source setting
             vidsrcs = self.core.get_video_sources()
             src = self.core.config.videosrc
@@ -256,7 +249,7 @@ class MainApp(QtGui.QMainWindow):
                     self.videosrc = 'fireware'
                 else:
                     self.core.logger.log.debug('Can NOT find video source: '+ src)
-    
+
                 if src == 'usb' or src == 'fireware':
                     dev = self.core.config.videodev
                     viddevs = self.core.get_video_devices(self.videosrc)
@@ -278,11 +271,11 @@ class MainApp(QtGui.QMainWindow):
                     self.core.change_soundsrc(src)
                 else:
                     self.core.logger.log.debug('Can NOT find audio source: '+ src)
- 
+
             # load resolution
             self.resolution =  self.core.config.resolution
             self.change_output_resolution()
-        
+
             # load streaming resolution
             self.streaming_resolution =  self.core.config.streaming_resolution
             self.change_streaming_resolution()
@@ -292,11 +285,11 @@ class MainApp(QtGui.QMainWindow):
                 mount = str(self.core.config.streaming_mount)
                 password = str(self.core.config.streaming_password)
                 resolution = str(self.core.config.streaming_resolution).strip(" ")
-                
+
                 if ( url == "" or port == "" or password == "" or mount == ""):
                     QtGui.QMessageBox.warning(self, self.tr("Incomplete Streaming Settings"), self.tr("Please ensure that all the input fields for streaming are complete or disable the streaming option") , QtGui.QMessageBox.Ok);
                 else:
-                    
+
                     if resolution in self.core.config.resmap:
                         res = self.core.config.resmap[resolution]
                         #self.core.backend.disable_icecast_streaming()
@@ -305,7 +298,7 @@ class MainApp(QtGui.QMainWindow):
                     self.core.backend.enable_icecast_streaming(url, int(port), password, mount, res)
             else:
                 self.core.backend.disable_icecast_streaming()
-        
+
     def change_output_resolution(self):
         res = str(self.resolution)
         if res in self.core.config.resmap:
@@ -318,7 +311,7 @@ class MainApp(QtGui.QMainWindow):
         width = s[0]
         height = s[1]
         self.core.change_output_resolution(width, height)
-    
+
     def change_streaming_resolution(self):
         res = str(self.streaming_resolution)
         if res in self.core.config.resmap:
@@ -346,24 +339,21 @@ class MainApp(QtGui.QMainWindow):
         '''
         Creates a presentation object from the currently selected title on the GUI
         '''
-        
-        title=unicode(self.ui.talkList.currentText())
-        
-        p_id = self.core.get_presentation_id_by_selected_title(title)
-        return self.core.get_presentation(p_id)
+        return Presentation(
+            title=unicode(self.ui.title.text()),
+            author=unicode(self.ui.author.text()),
+            start_time=datetime.datetime.now())
 
     def capture(self, state):
         '''
         Function for recording and stopping recording.
         '''
-
-
         if (state): # Start Recording.
             logo_rec = QtGui.QPixmap(":/freeseer/freeseer_logo_rec.png")
             sysIcon2 = QtGui.QIcon(logo_rec)
             self.systray.setIcon(sysIcon2)
 
-            self.core.record(self.current_presentation())    
+            self.core.record(self.current_presentation())
             self.ui.recordButton.setText(self.tr('Stop'))
             # check if auto-hide is set and if so hide
             if(self.core.config.auto_hide == True):
@@ -377,7 +367,7 @@ class MainApp(QtGui.QMainWindow):
             self.statusBar().showMessage('recording...')
             self.core.config.videosrc = self.videosrc
             self.core.config.writeConfig()
-            
+
         else: # Stop Recording.
             logo_rec = QtGui.QPixmap(":/freeseer/freeseer_logo.png")
             sysIcon = QtGui.QIcon(logo_rec)
@@ -388,7 +378,7 @@ class MainApp(QtGui.QMainWindow):
             self.statusBar().showMessage('ready')
             # for stop recording, we'll keep whatever window state
             # we have - hidden or showing
-            
+
 
     def test_sources(self, state):
         # Test video and audio sources
@@ -402,15 +392,15 @@ class MainApp(QtGui.QMainWindow):
     ### Talk Related
     ###
 
-    def get_rooms_and_talks_at_event(self, event):        
-        room_list = self.core.filter_rooms_by_event(self.ui.eventList.currentText())        
+    def get_rooms_and_talks_at_event(self, event):
+        room_list = self.core.filter_rooms_by_event(self.ui.eventList.currentText())
         self.update_room_list(room_list)
-        
+
         room = str(self.ui.roomList.currentText())
         talk_list = self.core.filter_talks_by_event_room(event, room)
-        
+
         self.update_talk_list(talk_list)
-        
+
     def get_talks_at_room(self, room):
         event = str(self.ui.eventList.currentText())
         talk_list = self.core.filter_talks_by_event_room(event, room)
@@ -418,27 +408,27 @@ class MainApp(QtGui.QMainWindow):
 
     def update_talk_list(self, talk_list):
         self.ui.talkList.clear()
-        
+
         for talk in talk_list:
             self.ui.talkList.addItem(talk)
-            
+
     def update_room_list(self, room_list):
         self.ui.roomList.clear()
-    
+
         for room in room_list:
             self.ui.roomList.addItem(room)
-                  
+
     def load_talks(self):
         '''
         This method updates the GUI with the available presentation titles.
         '''
-        
+
         # Update the main tab
         event = str(self.ui.eventList.currentText())
         room = str(self.ui.roomList.currentText())
         talk_list = self.core.filter_talks_by_event_room(event, room)
         self.update_talk_list(talk_list)
-            
+
     def load_events(self):
         '''
         This method updates the GUI with the available presentation events.
@@ -446,11 +436,11 @@ class MainApp(QtGui.QMainWindow):
         event_list = self.core.get_talk_events()
         self.ui.eventList.clear()
         self.ui.eventList.addItem("All")
-        
+
         for event in event_list:
             if len(event)>0:
-                self.ui.eventList.addItem(event)   
-            
+                self.ui.eventList.addItem(event)
+
     def load_rooms(self):
         '''
         This method updates the GUI with the available presentation rooms.
@@ -458,7 +448,7 @@ class MainApp(QtGui.QMainWindow):
         room_list = self.core.get_talk_rooms()
         self.ui.roomList.clear()
         self.ui.roomList.addItem("All")
-        
+
         for room in room_list:
             if len(room)>0:
                 self.ui.roomList.addItem(room)
@@ -474,13 +464,13 @@ class MainApp(QtGui.QMainWindow):
     ###
     ### Misc
     ###
-    
+
     def area_select(self):
         self.area_selector = QtAreaSelector(self)
         self.area_selector.show()
         self.core.logger.log.info('Desktop area selector started.')
         self.hide_window()
-    
+
     def desktopAreaEvent(self, start_x, start_y, end_x, end_y):
         self.start_x = self.core.config.start_x = start_x
         self.start_y = self.core.config.start_y = start_y
@@ -492,9 +482,9 @@ class MainApp(QtGui.QMainWindow):
 
     def _icon_activated(self, reason):
         if reason == QtGui.QSystemTrayIcon.Trigger:
-            self.hide_window() 
-            
-            
+            self.hide_window()
+
+
         if reason == QtGui.QSystemTrayIcon.DoubleClick:
             self.ui.recordButton.toggle()
 
@@ -506,9 +496,9 @@ class MainApp(QtGui.QMainWindow):
     def show_window(self):
         if (self.geometry is not None):
             self.restoreGeometry(self.geometry)
-        self.show()  
-        
-        
+        self.show()
+
+
     def toggle_window_visibility(self):
         if self.isHidden():
             self.show_window()
@@ -530,7 +520,7 @@ class MainApp(QtGui.QMainWindow):
     def closeEvent(self, event):
         self.core.logger.log.info('Exiting freeseer...')
         event.accept()
-        
+
 
     def translateAction(self ,action):
         '''
@@ -539,44 +529,38 @@ class MainApp(QtGui.QMainWindow):
         '''
         language_prefix = action.data().toString();
         self.translateFile(language_prefix);
-      
+
     def translateFile(self,file_ending):
         '''
         Actually performs the translation. This is called by the handler for the language menu
-        Note: If the language file can not be loaded then the default language is English 
+        Note: If the language file can not be loaded then the default language is English
         '''
         load_string = LANGUAGE_DIR+'tr_'+ file_ending; #create language file path
-        
+
         loaded = self.uiTranslator.load(load_string);
 
         if(loaded == True):
-   
+
             self.ui.retranslateUi(self); #Translate both the ui and the about page
             self.aboutDialog.translate();
-       
+
         else:
             print("Invalid Locale Resorting to Default Language: English");
 
         self.configTool.translateFile(file_ending);
-      
+
     def run_config_tool(self):
         self.connect(self.configTool, QtCore.SIGNAL("changed"),self.load_settings)
         self.configTool.show()
-        
+
         # Restore window positioning if one was saved.
         if (self.configTool.geometry is not None):
             self.configTool.restoreGeometry(self.configTool.geometry)
-        
+
     def run_talk_editor(self):
         self.connect(self.talkEditor, QtCore.SIGNAL('changed'), self.update_talk_views)
         self.talkEditor.show()
-        
+
         # Restore window positioning if one was saved.
         if (self.talkEditor.geometry is not None):
             self.talkEditor.restoreGeometry(self.talkEditor.geometry)
-
-if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
-    main = MainApp()
-    main.show();
-    sys.exit(app.exec_())

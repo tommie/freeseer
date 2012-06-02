@@ -24,20 +24,17 @@ QT4_RC_DEFS = [
     ('framework/resources/resource.qrc', 'framework/resource_rc.py'),
 ]
 
-build_dir = os.path.join('build', 'lib.%s-%s' % (distutils.util.get_platform(), sys.version[0:3]))
+build_dir = os.path.abspath(os.path.join('build', 'lib.%s-%s' % (distutils.util.get_platform(), sys.version[0:3])))
 
-for (inpath, outpath) in QT4_UI_DEFS:
+for (inpath, outpath) in QT4_UI_DEFS + QT4_RC_DEFS:
     outdir = os.path.join(build_dir, 'freeseer', os.path.dirname(outpath))
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
+for (inpath, outpath) in QT4_UI_DEFS:
     uic4(os.path.join('src', 'freeseer', inpath), os.path.join(build_dir, 'freeseer', outpath))
 
 for (inpath, outpath) in QT4_RC_DEFS:
-    outdir = os.path.join(build_dir, 'freeseer', os.path.dirname(outpath))
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-
     rcc4(os.path.join('src', 'freeseer', inpath), os.path.join(build_dir, 'freeseer', outpath))
 
 setup(name='freeseer',

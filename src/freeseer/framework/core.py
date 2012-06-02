@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # freeseer - vga/presentation capture software
@@ -28,6 +27,7 @@ import datetime
 import time
 import logging
 import logging.config
+import re
 import unicodedata
 
 from freeseer import project_info
@@ -35,7 +35,6 @@ from freeseer.backend.gstreamer import *
 
 from config import Config
 from logger import Logger
-from db_connector import *
 from rss_parser import *
 from presentation import *
 
@@ -48,12 +47,11 @@ class FreeseerCore:
     '''
     def __init__(self, ui):
         self.ui = ui
-        
+
         # Read in config information
         configdir = os.path.abspath(os.path.expanduser('~/.freeseer/'))
         self.config = Config(configdir)
         self.logger = Logger(configdir)
-        self.db = DB_Connector(configdir)
 
         # Start Freeseer Recording Backend
         self.backend = Freeseer_gstreamer(self)
@@ -69,207 +67,33 @@ class FreeseerCore:
 
         self.feedback = False
         self.spaces = False
-      
-        self.logger.log.info(u"Core initialized")   
+
+        self.logger.log.info(u"Core initialized")
 
 
-    def duplicate_exists(self, recordname):
-        '''
-        Checks to see if a record name already exists in the directory.
-        '''
-        filename = self.config.videodir + '/' + recordname
-        try:
-            result = open(filename, 'r')
-        except IOError:
-            return False
-        return True
-
-
-    def get_record_name(self, presentation):
+    def _get_record_name(self, presentation):
         '''
         Returns the filename to use when recording.
         '''
-        recordname = self.make_record_name(presentation)
-                
-        count = 0
-        tempname = recordname
-        
-        # check if this record name already exists in this directory and add "-NN" ending if so.
-        while(self.duplicate_exists(tempname + ".ogg")):
-            tempname = recordname + "-" + self.make_id_from_string(count, "0123456789")
-            count+=1
+        ts = presentation.start_time.strftime('%Y%m%dT%H%M%S')
 
-        recordname = tempname + ".ogg"
-                     
-        self.logger.log.debug('Set record name to ' + recordname)        
-        
-        return recordname
+        return '%s-%s-%s.ogg' % (
+            ts,
+            self._mangle_filename_part(presentation.author),
+            self._mangle_filename_part(presentation.title))
 
 
-    def make_record_name(self, presentation):
+    DISALLOWED_CHARACTERS = re.compile(r'[^\w_.]')
+
+
+    def _mangle_filename_part(self, s):
         '''
-        Create an 'EVENT-ROOM-SPEAKER-TITLE' record name
-        If any information is missing, we blank it out intelligently
-        And if we have nothing for some reason, we use "default"
-        '''	
-        event = self.make_shortname(presentation.event)
-        title = self.make_shortname(presentation.title)
-        room = self.make_shortname(presentation.room)
-        speaker = self.make_shortname(presentation.speaker)
-
-        recordname=""
-            
-        if(event!=""):
-            if(recordname!=""):
-                recordname=recordname+"-"+event
-            else:
-                recordname=event
-        
-        if(room!=""):
-            if(recordname!=""):
-                recordname=recordname+"-"+room
-            else:
-                recordname=room
-        
-        if(speaker!=""):
-            if(recordname!=""):
-                recordname=recordname+"-"+speaker
-            else:
-                recordname=speaker
-                
-        if(title!=""):
-            if(recordname!=""):
-                recordname=recordname+"-"+title
-            else:
-                recordname=title
-           
-        # Convert unicode filenames to their equivalent ascii so that
-        # we don't run into issues with gstreamer or filesystems
-        recordname=unicodedata.normalize('NFKD', recordname).encode('ascii','ignore')
-                
-        if(recordname!=""):
-            return recordname
-                    
-        return "default"
-
-    def make_id_from_string(self, position, string='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
+        Return a string suitable for use in a file name.
         '''
-        Returns an "NN" id given an integer and a string of valid characters for the id
-        ('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ' are the valid characters for UNIQUE in a record name)
-        '''
-        index1 = position % string.__len__()
-        index0 = int( position / string.__len__() )
+        s = s.replace(u'-', u'_').replace(u' ', u'_')
+        s = self.DISALLOWED_CHARACTERS.sub(u'', s)
 
-        if(index0 >= string.__len__() ):
-            self.logger.log.debug('WARNING: Unable to generate unique filename.')
-            # Return a unique 2 character string which will not overwrite previous files.
-            # There is a possibility of infinite looping on testing duplicates once
-            # all possible UNIQUE's and NN's are exhausted if all the files are kept 
-            # in the same directory.
-            # (36 * 36 * 100 filenames before this occurs, assuming EVENT is unique inside the directory.)
-            return "##" 
-
-        return string[index0]+string[index1]
-
-
-    def make_shortname(self, providedString):
-        '''
-        Returns the first 6 characters of a string.
-        Strip out non alpha-numeric characters, spaces, and most punctuation
-        '''
-                
-        bad_chars = set("!@#$%^&*()+=|:;{}[]',? <>~`/\\")
-        providedString="".join(ch for ch in providedString if ch not in bad_chars)
-        return providedString[0:6].upper()
-
-    ##
-    ## Database Functions
-    ##
-    def get_talk_titles(self):
-        return self.db.get_talk_titles()
-
-        
-    def get_talk_rooms(self):
-        return self.db.get_talk_rooms()
-
-    
-    def get_talk_events(self):
-        return self.db.get_talk_events()
-
-
-    def filter_talks_by_event_room(self, event, room):
-        return self.db.filter_talks_by_event_room(event, room)
-
-    
-    def filter_rooms_by_event(self,evento):
-        return self.db.filter_rooms_by_event(evento)
-
-
-    def get_presentation_id_by_selected_title(self, talk):
-        '''
-        Obtains a presentation ID given a title string from the GUI
-        '''
-        
-        speaker = talk.split(' - ', 1)[0].strip()
-        title = talk.split(' - ', 1)[1].strip()
-        
-        talk_id = self.db.get_presentation_id_from_talk(speaker, title)
-        
-        return talk_id
-
-    def get_presentation(self, presentation_id):
-        return self.db.get_presentation(presentation_id)
-
-
-    def add_talks_from_rss(self, rss):
-        entry = str(rss)
-        feedparser = FeedParser(entry)
-
-        if len(feedparser.build_data_dictionary()) == 0:
-            self.logger.log.info("RSS: No data found.")
-
-        else:
-            for presentation in feedparser.build_data_dictionary():
-                talk = Presentation(presentation["Title"],
-                                    presentation["Speaker"],
-                                    presentation["Abstract"],  # Description
-                                    presentation["Level"],
-                                    presentation["Event"],
-                                    presentation["Time"],
-                                    presentation["Room"])
-                                    
-                if not self.db.db_contains(talk):
-                    self.add_talk(talk)
-
-
-    def get_presentation_id(self, presentation):
-        talk_id = self.db.get_presentation_id(presentation)
-        self.logger.log.debug('Found presentation id for %s - %s. ID: %s',
-                                presentation.speaker,
-                                presentation.title,
-                                talk_id)
-        return talk_id
-
-
-    def add_talk(self, presentation):
-        self.db.add_talk(presentation)
-        self.logger.log.debug('Talk added: %s - %s', presentation.speaker, presentation.title)
-
-        
-    def update_talk(self, talk_id, speaker, title, room, event, dateTime):
-        self.db.update_talk(talk_id, speaker, title, room, event, dateTime)
-        self.logger.log.debug('Talk updated: %s - %s', speaker, title)
-
-        
-    def delete_talk(self, talk_id):
-        self.db.delete_talk(talk_id)
-        self.logger.log.debug('Talk deleted: %s', talk_id)
-
-
-    def clear_database(self):
-        self.db.clear_database()
-        self.logger.log.debug('Database cleared!')
-
+        return unicodedata.normalize('NFKD', s)[:32].encode('utf-8')
 
     ##
     ## Backend Functions
@@ -282,7 +106,7 @@ class FreeseerCore:
         self.logger.log.debug('Available video sources: ' + str(vidsrcs))
         return vidsrcs
 
-        
+
     def get_video_devices(self, device_type):
         '''
         Returns available video devices.
@@ -291,7 +115,7 @@ class FreeseerCore:
         self.logger.log.debug('Available video devices for ' + device_type + ': ' + str(viddevs))
         return viddevs
 
-    
+
     def get_audio_sources(self):
         '''
         Returns supported audio sources.
@@ -310,10 +134,10 @@ class FreeseerCore:
             self.logger.log.info('Video recording: ENABLED')
         else:
             self.logger.log.info('Video recording: DISABLED')
-            
+
         self.backend.set_video_mode(mode)
 
-        
+
     def change_videosrc(self, vid_source, vid_device):
         '''
         Informs backend of new video source to use when recording.
@@ -389,34 +213,29 @@ class FreeseerCore:
             self.backend.test_feedback_stop()
 
 
-    def prepare_metadata(self, presentation):
+    def _prepare_metadata(self, presentation):
         '''
         Returns a dictionary of tags and tag values to be used
         to populate the current recording's file metadata.
         '''
         return { "title" : presentation.title,
-                 "artist" : presentation.speaker,
-                 "performer" : presentation.speaker,
-                 "album" : presentation.event,
-                 "location" : presentation.room,
-                 "date" : str(datetime.date.today()),
-                 "comment" : presentation.description}
+                 "artist" : presentation.author,
+                 "performer" : presentation.author,
+                 "date" : str(presentation.start_time),
+        }
 
 
     def record(self, presentation):
         '''
         Informs backend to begin recording presentation.
         '''
-        #create a filename to record to
-        record_name = self.get_record_name(presentation)
+        self.backend.populate_metadata(self._prepare_metadata(presentation))
 
-        #prepare metadata
-        data = self.prepare_metadata(presentation)
-        self.backend.populate_metadata(data)
-
-        record_location = os.path.abspath(self.config.videodir + '/' + record_name)
+        record_name = self._get_record_name(presentation)
+        record_location = os.path.abspath(os.path.join(self.config.videodir, record_name))
         self.backend.record(record_location)
         self.logger.log.info('Recording started')
+
 
     def stop(self):
         '''
@@ -434,7 +253,7 @@ class FreeseerCore:
             self.feedback = True
             self.backend.test_feedback_start(video, audio)
 
-            
+
     def preview(self, enable=False, window_id=None):
         '''
         Enable/Disable the video preview window.
