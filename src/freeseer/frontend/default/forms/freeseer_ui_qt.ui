@@ -210,16 +210,10 @@
       <string>Language</string>
      </property>
     </widget>
+    <addaction name="actionPreferences"/>
     <addaction name="menuLanguage"/>
    </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>Edit</string>
-    </property>
-    <addaction name="actionPreferences"/>
-   </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
    <addaction name="menuOptions"/>
    <addaction name="menuHelp"/>
   </widget>
