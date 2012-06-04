@@ -372,7 +372,7 @@ class MainApp(QtGui.QMainWindow):
             logo_rec = QtGui.QPixmap(":/freeseer/freeseer_logo.png")
             sysIcon = QtGui.QIcon(logo_rec)
             self.systray.setIcon(sysIcon)
-            self.core.stop()
+            self.core.stop(self.current_presentation())
             self.ui.recordButton.setText(self.tr('Record'))
             self.ui.audioFeedbackSlider.setValue(0)
             self.statusBar().showMessage('ready')

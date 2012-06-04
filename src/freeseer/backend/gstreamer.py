@@ -95,7 +95,7 @@ class Freeseer_gstreamer(BackendInterface):
     ##
     def on_message(self, bus, message):
         t = message.type
-      
+
         if t == gst.MESSAGE_EOS:
             #self.player.set_state(gst.STATE_NULL)
             self.stop()
@@ -111,7 +111,7 @@ class Freeseer_gstreamer(BackendInterface):
                     self.core.logger.log.debug('v4l2src failed, falling back to v4lsrc')
                     self.change_video_source('usb_fallback', self.video_device)
                     self.record(self.filename)
-                    
+
         elif message.structure is not None:
             s = message.structure.get_name()
 
@@ -119,7 +119,7 @@ class Freeseer_gstreamer(BackendInterface):
             if s == 'level':
                 msg = message.structure.to_string()
                 rms_dB = float(msg.split(',')[6].split('{')[1].rstrip('}'))
-                
+
                 # This is an inaccurate representation of decibels into percent
                 # conversion, this code should be revisited.
                 try:
@@ -127,7 +127,7 @@ class Freeseer_gstreamer(BackendInterface):
                 except OverflowError:
                     percent = 0
                 self.core.audioFeedbackEvent(percent)
-            
+
     def on_sync_message(self, bus, message):
         if message.structure is None:
             return
@@ -169,14 +169,14 @@ class Freeseer_gstreamer(BackendInterface):
             # not sure about device format on windows. for now lets just use the default
             if os.name == 'posix': # only set device for linux systems.
                 video_src.set_property('device', self.video_device)
-            
 
-            
+
+
         video_rate = gst.element_factory_make('videorate', 'video_rate')
         video_rate_cap = gst.element_factory_make('capsfilter',
                                                     'video_rate_cap')
         video_rate_cap.set_property('caps',
-                        gst.caps_from_string('video/x-raw-rgb, framerate=10/1'))
+                        gst.caps_from_string('video/x-raw-rgb, framerate=25/1'))
         video_scale = gst.element_factory_make('videoscale', 'video_scale')
         video_scale_cap = gst.element_factory_make('capsfilter',
                                                     'video_scale_cap')
@@ -198,7 +198,7 @@ class Freeseer_gstreamer(BackendInterface):
                         video_scale_cap,
                         video_cspace,
                         self.video_tee)
-        
+
         if ( self.icecast ):
             # Add a "tee" component so that the icecast components can be built at the end
             self.src_tee = gst.element_factory_make('tee', 'src_tee')
@@ -212,18 +212,18 @@ class Freeseer_gstreamer(BackendInterface):
             self.dv1394dvdemux =  gst.element_factory_make('dvdemux',
                                                            'dv1394dvdemux')
             self.dv1394dvdec =  gst.element_factory_make('dvdec', 'dv1394dvdec')
-            
+
             self.player.add(self.dv1394q1,
                             self.dv1394q2,
                             self.dv1394dvdemux,
                             self.dv1394dvdec)
-            
+
             if ( self.icecast ):
                 # The "src_tee" was added so link from it
                 self.src_tee.link(self.dv1394dvdemux)
-            else:                
+            else:
                 video_src.link(self.dv1394dvdemux)
-            
+
                 self.dv1394dvdemux.connect('pad-added', self._dvdemux_padded)
                 gst.element_link_many(self.dv1394q1, self.dv1394dvdec, video_rate)
         else:
@@ -249,7 +249,7 @@ class Freeseer_gstreamer(BackendInterface):
         video_scale = self.player.get_by_name('video_scale')
         video_scale_cap = self.player.get_by_name('video_scale_cap')
         video_cspace = self.player.get_by_name('video_cspace')
-        
+
         if ( self.icecast ):
             # The "src_tee" was added so remove it
             self.player.remove(self.src_tee)
@@ -301,7 +301,7 @@ class Freeseer_gstreamer(BackendInterface):
 
         self.player.add(vpqueue, vpsink)
         gst.element_link_many(self.video_tee, vpqueue, vpsink)
-    
+
     def _clear_video_feedback(self):
         vpqueue = self.player.get_by_name('vpqueue')
         vpsink = self.player.get_by_name('vpsink')
@@ -332,7 +332,7 @@ class Freeseer_gstreamer(BackendInterface):
         '''
         Sets the audio encoder pipeline
         '''
-        
+
         audioenc_queue = gst.element_factory_make('queue',
                                                         'audioenc_queue')
         audioenc_convert = gst.element_factory_make('audioconvert',
@@ -363,7 +363,7 @@ class Freeseer_gstreamer(BackendInterface):
                               audioenc_codec,
                               audioenc_tags,
                               self.mux)
-                              
+
     def _clear_audio_encoder(self):
         '''
         Clears the audio encoder pipeline
@@ -501,7 +501,7 @@ class Freeseer_gstreamer(BackendInterface):
     def test_feedback_start(self, video=False, audio=False):
         self.test_video = video
         self.test_audio = audio
-        
+
         if self.test_video == True:
             self._set_video_source()
             self._set_video_feedback()
@@ -514,11 +514,11 @@ class Freeseer_gstreamer(BackendInterface):
 
     def test_feedback_stop(self):
         self.player.set_state(gst.STATE_NULL)
-        
+
         if self.test_video == True:
             self._clear_video_source()
             self._clear_video_feedback()
-            
+
         if self.test_audio == True:
             self._clear_audio_source()
             self._clear_audio_feedback()
@@ -564,10 +564,10 @@ class Freeseer_gstreamer(BackendInterface):
 
             if self.recording_audio_feedback == True:
                 self._set_audio_feedback()
-                
+
         if self.icecast == True:
             self._set_icecast_streaming()
-            
+
         self.player.set_state(gst.STATE_PLAYING)
 
     def stop(self):
@@ -580,10 +580,10 @@ class Freeseer_gstreamer(BackendInterface):
         if self.record_video == True:
             self._clear_video_source()
             self._clear_video_encoder()
-            
+
             if self.recording_video_feedback == True:
                 self._clear_video_feedback()
-            
+
         if self.record_audio == True:
             self._clear_audio_source()
             self._clear_audio_encoder()
@@ -692,7 +692,7 @@ class Freeseer_gstreamer(BackendInterface):
         # If streaming is being done, reset the bitrate according to the new resolution
         if self.icecast:
             self.change_stream_resolution(self.icecast_width, self.icecast_height, width, height)
-    
+
     def change_stream_resolution(self, width, height, record_width, record_height):
         '''
         Sets the resolution of the streamed video, and attempts to choose the ideal bitrate for the given resolutions.
@@ -704,8 +704,8 @@ class Freeseer_gstreamer(BackendInterface):
                     '480,640': 800, '480,800': 800, '480,1024': 350,    # bit rates for 480x360 stream
                     '640,640': 1250, '640,800': 1000, '640,1024': 500,  # bit rates for 640x480 stream
                     '800,640': 1250, '800,800': 1000, '800,1024': 750   # bit rates for 800x600 stream
-                 }                  
-        
+                 }
+
         # If the pairing cannot be found, we back off to the average best bitrate at each resolution
         default_bitmap = { 320: 400, # resolution of 320x240 - 400 kbps
                             480: 500, # resolution of 480x360 - 500 kbps
@@ -721,12 +721,12 @@ class Freeseer_gstreamer(BackendInterface):
         self.icecast_height = height
 
         # If the pairing is found in bitmap, use the given bitrate
-        if stream_rec_pair in bitmap:         
+        if stream_rec_pair in bitmap:
             self.icecast_vidbitrate = bitmap[stream_rec_pair]
         elif self.icecast_width in default_bitmap:              # Else, if the stream resolution is in default_bitmap, use that bitrate
             self.icecast_vidbitrate = default_bitmap[width]
         else:                                                   # If pairing not in default_bitmap, use default value of 1000
-            self.icecast_vidbitrate = 1000                      
+            self.icecast_vidbitrate = 1000
 
     def change_audio_source(self, new_source):
         '''
@@ -784,7 +784,7 @@ class Freeseer_gstreamer(BackendInterface):
         Disable the audio feedback.
         '''
         self.recording_audio_feedback = False
-        
+
     def enable_icecast_streaming(self, ip='127.0.0.1',
                                        port=8000,
                                        password='hackme',

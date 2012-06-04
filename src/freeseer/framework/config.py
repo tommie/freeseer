@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # freeseer - vga/presentation capture software
@@ -36,13 +35,15 @@ class Config:
         '''
         # Get the user's home directory
         self.userhome = os.path.expanduser('~')
-        
+
         # Config location
         self.configdir = configdir
         self.configfile = os.path.abspath("%s/freeseer.conf" % self.configdir)
-        
+
         # Set default settings
         self.videodir = os.path.abspath('%s/Videos/' % self.userhome)
+        self.uploaddir = os.path.abspath(os.path.join(configdir, 'spool-upload'))
+        self.archivedest = ''
         self.presentations_file = os.path.abspath('%s/presentations.db' % self.configdir)
         self.resolution = '0x0' # no scaling for video
 
@@ -61,7 +62,7 @@ class Config:
 
         self.enable_video_recoding = True
         self.enable_audio_recoding = True
-        
+
         self.enable_streaming = 'False'
         self.streaming_resolution = '0x0' #no scaling for streaming
         self.streaming_mount = 'stream.ogv'
@@ -72,38 +73,42 @@ class Config:
         # Map of resolution names to the actual resolution (both stream and record)
         # Names should include all options available in the GUI
 
-        self.resmap = { '240p':'320x240', 
-                        '360p':'480x360', 
-                        '480p':'640x480', 
-                        '720p':'1280x720', 
+        self.resmap = { '240p':'320x240',
+                        '360p':'480x360',
+                        '480p':'640x480',
+                        '720p':'1280x720',
                         '1080p':'1920x1080' }
 
         # Read in the config file
         self.readConfig()
-        
-        # Make the recording directory
-        try:
+
+        if not os.path.exists(self.uploaddir):
+            # Chances of a race in this type of application is zero.
+            os.makedirs(self.uploaddir)
+
+        if not os.path.exists(self.videodir):
+            # Chances of a race in this type of application is zero.
             os.makedirs(self.videodir)
-        except OSError:
-            print('Video directory exists.')
-            
+
     def readConfig(self):
         '''
         Read in settings from config file if exists.
         If the config file does not exist create one and set some defaults.
         '''
         config = ConfigParser.ConfigParser()
-        
+
         try:
             config.readfp(open(self.configfile))
         # Config file does not exist, create a default
         except IOError:
             self.writeConfig()
             return
-                
+
         # Config file exists, read in the settings
         try:
             self.videodir = config.get('Global', 'video_directory')
+            self.uploaddir = config.get('Global', 'upload_spool_directory')
+            self.archivedest = config.get('Global', 'archive_destination')
             self.resolution = config.get('Global', 'resolution')
             self.videosrc = config.get('lastrun', 'video_source')
             self.videodev = config.get('lastrun', 'video_device')
@@ -127,16 +132,18 @@ class Config:
         except:
             print('Corrupt config found, creating a new one.')
             self.writeConfig()
-        
+
     def writeConfig(self):
         '''
         Write settings to a config file.
         '''
         config = ConfigParser.ConfigParser()
-        
+
         # Set config settings
         config.add_section('Global')
         config.set('Global', 'video_directory', self.videodir)
+        config.set('Global', 'upload_spool_directory', self.uploaddir)
+        config.set('Global', 'archive_destination', self.archivedest)
         config.set('Global', 'resolution', self.resolution)
         config.set('Global','streaming_resolution',self.streaming_resolution)
         config.add_section('lastrun')
@@ -157,19 +164,12 @@ class Config:
         config.set('lastrun','streaming_port',self.streaming_port)
         config.set('lastrun','streaming_password',self.streaming_password)
         config.set('lastrun','streaming_url',self.streaming_url)
-        # Make sure the config directory exists before writing to the configfile 
+        # Make sure the config directory exists before writing to the configfile
         try:
             os.makedirs(self.configdir)
         except OSError:
             pass # directory exists.
-        
+
         # Save default settings to new config file
         with open(self.configfile, 'w') as configfile:
             config.write(configfile)
-            
-# Config class test code
-if __name__ == "__main__":
-    config = Config(os.path.abspath(os.path.expanduser('~/.freeseer/')))
-    print('\nTesting freeseer config file')
-    print('Video Directory at %s' % config.videodir)
-    print('Test complete!')

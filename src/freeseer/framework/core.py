@@ -90,7 +90,7 @@ class FreeseerCore:
         '''
         Return a string suitable for use in a file name.
         '''
-        s = s.replace(u'-', u'_').replace(u' ', u'_')
+        s = s.lower().replace(u'-', u'_').replace(u' ', u'_')
         s = self.DISALLOWED_CHARACTERS.sub(u'', s)
 
         return unicodedata.normalize('NFKD', s)[:32].encode('utf-8')
@@ -221,7 +221,8 @@ class FreeseerCore:
         return { "title" : presentation.title,
                  "artist" : presentation.author,
                  "performer" : presentation.author,
-                 "date" : str(presentation.start_time),
+                 "date" : presentation.start_time.strftime('%Y-%m-%d'),
+                 "extended-comment" : 'timestamp=' + presentation.start_time.strftime('%Y-%m-%d %H:%M:%S%z'),
         }
 
 
@@ -231,17 +232,26 @@ class FreeseerCore:
         '''
         self.backend.populate_metadata(self._prepare_metadata(presentation))
 
+        self._current_presentation = presentation
         record_name = self._get_record_name(presentation)
         record_location = os.path.abspath(os.path.join(self.config.videodir, record_name))
         self.backend.record(record_location)
         self.logger.log.info('Recording started')
 
 
-    def stop(self):
+    def stop(self, presentation):
         '''
         Informs backend to stop recording.
         '''
         self.backend.stop()
+
+        # Queue file for upload
+        record_name = self._get_record_name(self._current_presentation)
+
+        os.link(
+            os.path.join(self.config.videodir, record_name),
+            os.path.join(self.config.uploaddir, record_name))
+
         self.logger.log.info('Recording stopped')
 
 
